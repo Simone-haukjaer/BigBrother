@@ -1,0 +1,17 @@
+{
+    "id": "1",
+    "name": "John Doe",
+    "age": 34,
+    "gender": "Male",
+    "bmi": 24.5,
+    "blood_type": "O+",
+    "smoker": false,
+    "health_risks": {
+      "diabetes_risk": 0.6,
+      "heart_disease_risk": 0.7,
+      "stroke_risk": 0.3,
+      "alzheimer_risk": 0.5,
+      "lung_cancer_risk": 0.1
+    }
+  }
+  
