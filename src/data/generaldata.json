@@ -1,0 +1,14 @@
+{
+    "average_bmi": 24.9,
+    "average_heart_rate_bpm": 72,
+    "average_cholesterol_level": 190,
+    "average_blood_pressure": "120/80",
+    "genetic_risk_averages": {
+      "diabetes_risk": 0.4,
+      "heart_disease_risk": 0.5,
+      "stroke_risk": 0.3,
+      "alzheimer_risk": 0.2,
+      "lung_cancer_risk": 0.15
+    }
+  }
+  
