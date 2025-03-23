@@ -2,12 +2,384 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="d3" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Big Brother - Health Data</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .risk-matrix {
+      font-family: Arial, sans-serif;
+    }
+    .risk-matrix text {
+      font-size: 12px;
+    }
+    .risk-matrix .title {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .risk-cell:hover {
+      stroke: #000;
+      stroke-width: 2px;
+    }
+    .legend-label {
+      font-size: 10px;
+    }
+    .axis-label {
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .person-marker {
+      stroke: #000;
+      stroke-width: 2px;
+    }
+    .average-marker {
+      stroke: #000;
+      stroke-width: 2px;
+      stroke-dasharray: 3,3;
+    }
+    .loading {
+      font-size: 18px;
+      text-align: center;
+      padding: 20px;
+    }
+    .error {
+      color: red;
+      font-size: 16px;
+      text-align: center;
+      padding: 20px;
+    }
+    /* New styles for the layout */
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .graph-container {
+      flex: 0 0 600px;
+      position: relative;
+    }
+    .analysis-container {
+      flex: 1;
+      padding: 20px;
+      padding-top: 80px;
+      min-width: 300px;
+    }
+    .markers-legend {
+      position: absolute;
+      bottom: 10px;
+      left: 20px; 
+      padding: 5px;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 5px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin: 5px 0;
+    }
+    .legend-circle {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+      display: inline-block;
+    }
+    .back-button {
+      margin-top: 20px;
+      padding: 8px 16px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Insert here</h1>
+  <h1>Your Risk Analysis</h1>
+  <div class="container">
+    <div class="graph-container" id="risk-matrix-container">
+      <div class="loading">Loading data...</div>
+    </div>
+    
+    <div class="analysis-container" id="risk-analysis">
+      <p><strong>Risk Analysis:</strong> Loading...</p>
+    </div>
+  </div>
+  
+  <button class="back-button" onclick="window.location.href='index.html'">Back to Data View</button>
 
+  <script type="module">
+    import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+
+    // Load JSON data
+    Promise.all([
+      fetch("data/persondata.json").then(res => res.json()),
+      fetch("data/generaldata.json").then(res => res.json())
+    ])
+    .then(([personData, generalData]) => {
+      // Remove loading message
+      document.querySelector(".loading").remove();
+      
+      // Create risk matrix visualization
+      createRiskMatrix(personData, generalData);
+      
+      // Update analysis text
+      updateAnalysis(personData, generalData);
+    })
+    .catch(err => {
+      document.getElementById("risk-matrix-container").innerHTML = 
+        `<div class="error">Error loading data: ${err.message}</div>`;
+      console.error("Error loading data:", err);
+    });
+
+    // Function to create the risk matrix
+    function createRiskMatrix(personData, generalData) {
+      // Risk matrix configuration
+      const config = {
+        width: 600,
+        height: 500,
+        margin: { top: 80, right: 50, bottom: 100, left: 140 }, // Increased left margin for y-axis
+        cellSize: 60,
+        levels: 5, // 5x5 risk matrix
+        colorRange: ["#00ff00", "#ffff00", "#ff0000"] // green to yellow to red
+      };
+
+      // Calculate actual dimensions
+      const width = config.width;
+      const height = config.height;
+      
+      // Create SVG container
+      const svg = d3.select("#risk-matrix-container")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("class", "risk-matrix");
+
+      // Risk levels and descriptions
+      const impactLevels = [
+        { level: 1, label: "Minimal", description: "Minimal impact on health" },
+        { level: 2, label: "Minor", description: "Minor impact, manageable" },
+        { level: 3, label: "Moderate", description: "Moderate impact, requires attention" },
+        { level: 4, label: "Major", description: "Major impact, significant concern" },
+        { level: 5, label: "Severe", description: "Severe impact, critical concern" }
+      ];
+
+      const likelihoodLevels = [
+        { level: 1, label: "Rare", description: "Very unlikely to occur" },
+        { level: 2, label: "Unlikely", description: "Could occur but not expected" },
+        { level: 3, label: "Possible", description: "Might occur at some point" },
+        { level: 4, label: "Likely", description: "Will probably occur" },
+        { level: 5, label: "Almost Certain", description: "Expected to occur" }
+      ];
+
+      // Create color scale
+      const colorScale = d3.scaleLinear()
+        .domain([1, 3, 5]) 
+        .range(config.colorRange)
+        .interpolate(d3.interpolateRgb);
+
+      // Calculate risk score (1-25)
+      const calculateRiskScore = (impact, likelihood) => impact * likelihood;
+
+      // Convert a probability (0-1) to a risk level (1-5)
+      const probabilityToLevel = probability => {
+        if (probability < 0.2) return 1;
+        if (probability < 0.4) return 2;
+        if (probability < 0.6) return 3;
+        if (probability < 0.8) return 4;
+        return 5;
+      };
+
+      // Extract Alzheimer's risk values from the data
+      const personAlzheimerRisk = personData.health_risks.alzheimer_risk;
+      const averageAlzheimerRisk = generalData.genetic_risk_averages.alzheimer_risk;
+
+      // Convert Alzheimer risk to impact and likelihood
+      const personImpact = probabilityToLevel(personAlzheimerRisk);
+      const personLikelihood = probabilityToLevel(personAlzheimerRisk);
+      
+      const averageImpact = probabilityToLevel(averageAlzheimerRisk);
+      const averageLikelihood = probabilityToLevel(averageAlzheimerRisk);
+
+      // Calculate cell size based on available space
+      const cellSize = Math.min(
+        (width - config.margin.left - config.margin.right) / config.levels,
+        (height - config.margin.top - config.margin.bottom) / config.levels
+      );
+
+      // Add title
+      svg.append("text")
+        .attr("class", "title")
+        .attr("x", width / 2)
+        .attr("y", 30)
+        .attr("text-anchor", "middle")
+        .text("Alzheimer's Risk Matrix");
+
+      // Add subtitle with person name
+      svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", 50)
+        .attr("text-anchor", "middle")
+        .text(`${personData.name} vs. Population Average`);
+
+      // Create cells
+      const cells = [];
+      for (let impact = 1; impact <= config.levels; impact++) {
+        for (let likelihood = 1; likelihood <= config.levels; likelihood++) {
+          cells.push({
+            impact,
+            likelihood,
+            score: calculateRiskScore(impact, likelihood)
+          });
+        }
+      }
+
+      // Draw cells
+      const g = svg.append("g")
+        .attr("transform", `translate(${config.margin.left},${config.margin.top})`);
+
+      g.selectAll(".risk-cell")
+        .data(cells)
+        .enter()
+        .append("rect")
+        .attr("class", "risk-cell")
+        .attr("x", d => (d.likelihood - 1) * cellSize)
+        .attr("y", d => (config.levels - d.impact) * cellSize)
+        .attr("width", cellSize)
+        .attr("height", cellSize)
+        .attr("fill", d => colorScale(Math.sqrt(d.score)))
+        .append("title")
+        .text(d => `Impact: ${impactLevels[d.impact-1].label}, Likelihood: ${likelihoodLevels[d.likelihood-1].label}\nRisk Score: ${d.score}`);
+
+      // Add person marker
+      g.append("circle")
+        .attr("class", "person-marker")
+        .attr("cx", (personLikelihood - 0.5) * cellSize)
+        .attr("cy", (config.levels - personImpact + 0.5) * cellSize)
+        .attr("r", 10)
+        .attr("fill", "rgba(0, 0, 255, 0.7)")
+        .append("title")
+        .text(`${personData.name}: Impact ${personImpact}, Likelihood ${personLikelihood}\nRisk Value: ${personAlzheimerRisk.toFixed(2)}`);
+
+      // Add population average marker
+      g.append("circle")
+        .attr("class", "average-marker")
+        .attr("cx", (averageLikelihood - 0.5) * cellSize)
+        .attr("cy", (config.levels - averageImpact + 0.5) * cellSize)
+        .attr("r", 10)
+        .attr("fill", "rgba(128, 128, 128, 0.7)")
+        .append("title")
+        .text(`Population Average: Impact ${averageImpact}, Likelihood ${averageLikelihood}\nRisk Value: ${averageAlzheimerRisk.toFixed(2)}`);
+
+      // Add HTML-based marker legends under the graph to the left
+      const markersLegendDiv = document.createElement("div");
+      markersLegendDiv.className = "markers-legend";
+      markersLegendDiv.innerHTML = `
+        <div class="legend-item">
+          <div class="legend-circle" style="background-color: rgba(0, 0, 255, 0.7);"></div>
+          <span>${personData.name}</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-circle" style="background-color: rgba(128, 128, 128, 0.7);"></div>
+          <span>Population Average</span>
+        </div>
+      `;
+      document.getElementById("risk-matrix-container").appendChild(markersLegendDiv);
+
+      // Draw x-axis (Likelihood)
+      const xAxis = g.append("g")
+        .attr("transform", `translate(0, ${config.levels * cellSize})`);
+
+      xAxis.selectAll("text")
+        .data(likelihoodLevels)
+        .enter()
+        .append("text")
+        .attr("x", (d, i) => (i + 0.5) * cellSize)
+        .attr("y", 25)
+        .attr("text-anchor", "middle")
+        .text(d => d.label);
+
+      // X-axis label
+      g.append("text")
+        .attr("class", "axis-label")
+        .attr("x", (config.levels * cellSize) / 2)
+        .attr("y", config.levels * cellSize + 50)
+        .attr("text-anchor", "middle")
+        .text("Likelihood");
+
+      // Draw y-axis (Impact) - Fixed positioning to prevent clipping into text
+      const yAxis = g.append("g")
+        .attr("transform", `translate(-30, 0)`);  // Increased the offset from -10 to -30
+
+      yAxis.selectAll("text")
+        .data(impactLevels.slice().reverse())
+        .enter()
+        .append("text")
+        .attr("x", -10)
+        .attr("y", (d, i) => (i + 0.5) * cellSize)
+        .attr("text-anchor", "end")
+        .attr("dominant-baseline", "middle")
+        .text(d => d.label);
+
+      // Y-axis label - Fixed positioning
+      g.append("text")
+        .attr("class", "axis-label")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -(config.levels * cellSize) / 2)
+        .attr("y", -105)  // Increased from -50 to -70
+        .attr("text-anchor", "middle")
+        .text("Impact");
+
+      // Add risk level legend
+      const defs = svg.append("defs");
+      const linearGradient = defs.append("linearGradient")
+        .attr("id", "risk-gradient")
+        .attr("x1", "0%")
+        .attr("y1", "0%")
+        .attr("x2", "100%")
+        .attr("y2", "0%");
+
+      linearGradient.selectAll("stop")
+        .data([
+          {offset: "0%", color: config.colorRange[0]},
+          {offset: "50%", color: config.colorRange[1]},
+          {offset: "100%", color: config.colorRange[2]}
+        ])
+        .enter().append("stop")
+        .attr("offset", d => d.offset)
+        .attr("stop-color", d => d.color);
+    }
+
+    // Function to update the analysis text
+    function updateAnalysis(personData, generalData) {
+      const personRisk = personData.health_risks.alzheimer_risk;
+      const averageRisk = generalData.genetic_risk_averages.alzheimer_risk;
+      const riskDifference = ((personRisk - averageRisk) / averageRisk * 100).toFixed(0);
+      
+      let riskLevel;
+      if (personRisk < 0.2) riskLevel = "low";
+      else if (personRisk < 0.6) riskLevel = "moderate";
+      else riskLevel = "high";
+      
+      const analysisHtml = `
+        <p><strong>Risk Analysis:</strong></p>
+        <p>This risk matrix shows your Alzheimer's risk (blue circle) 
+        compared to the population average (gray circle). The x-axis represents likelihood, while the y-axis 
+        represents impact. The color gradient from green to yellow to red indicates increasing risk levels.</p>
+        
+        <p><strong>Interpretation:</strong></p>
+        <p>Your Alzheimer's risk (${(personRisk * 100).toFixed(1)}%) 
+        is ${riskDifference}% higher than the population average (${(averageRisk * 100).toFixed(1)}%). 
+        Your risk falls in the ${riskLevel} range.</p>
+        
+        <p><strong>Risk Factors:</strong></p>
+        <p>
+        Age: ${personData.age} years old<br>
+        Gender: ${personData.gender}<br>
+        BMI: ${personData.bmi} (avg: ${generalData.average_bmi})<br>
+        Blood Type: ${personData.blood_type}<br>
+        Smoker: ${personData.smoker ? "Yes" : "No"}
+        </p>
+      `;
+      
+      document.getElementById("risk-analysis").innerHTML = analysisHtml;
+    }
+  </script>
 </body>
 </html>
