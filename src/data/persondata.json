@@ -10,8 +10,7 @@
       "diabetes_risk": 0.6,
       "heart_disease_risk": 0.7,
       "stroke_risk": 0.3,
-      "altheimers_indicative_mutations:": 1,
-      "alzheimers_risk": 0.5,
+      "alzheimer_risk": 0.5,
       "lung_cancer_risk": 0.1
     },
     "dna_uniqueness": {
