@@ -1,3 +1,4 @@
+<!--Big thanks to Claude AI for baisically making all of this-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,145 +7,236 @@
   <title>Big Brother - Health Data</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    .risk-matrix {
-      font-family: Arial, sans-serif;
-    }
-    .risk-matrix text {
-      font-size: 12px;
-    }
-    .risk-matrix .title {
-      font-size: 16px;
-      font-weight: bold;
-    }
-    .risk-cell:hover {
-      stroke: #000;
-      stroke-width: 2px;
-    }
-    .legend-label {
-      font-size: 10px;
-    }
-    .axis-label {
-      font-size: 14px;
-      font-weight: bold;
-    }
-    .person-marker {
-      stroke: #000;
-      stroke-width: 2px;
-    }
-    .average-marker {
-      stroke: #000;
-      stroke-width: 2px;
-      stroke-dasharray: 3,3;
-    }
-    .loading {
-      font-size: 18px;
-      text-align: center;
+    /* Base styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f7f9fc;
+      margin: 0;
       padding: 20px;
     }
-    .error {
-      color: red;
-      font-size: 16px;
+    
+    h1 {
       text-align: center;
-      padding: 20px;
+      color: #2c3e50;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #3498db;
     }
-    /* New styles for the layout */
+    
+    /* Container styles */
     .container {
       display: flex;
       flex-direction: column;
       max-width: 1200px;
       margin: 0 auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 25px;
     }
-    .pie-container {
-      margin: 0 auto;
-      margin-bottom: 30px;
-      width: 100%;
+    
+    .content-row {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 20px;
     }
+    
+    /* Risk matrix styles */
+    .risk-matrix {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .risk-matrix text {
+      font-size: 13px;
+    }
+    
+    .risk-matrix .title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    .risk-cell {
+      transition: all 0.3s ease;
+    }
+    
+    .risk-cell:hover {
+      stroke: #000;
+      stroke-width: 2px;
+      filter: brightness(1.1);
+    }
+    
+    .axis-label {
+      font-size: 15px;
+      font-weight: bold;
+      fill: #2c3e50;
+    }
+    
+    .person-marker {
+      stroke: #000;
+      stroke-width: 2px;
+      filter: drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.3));
+    }
+    
+    .average-marker {
+      stroke: #000;
+      stroke-width: 2px;
+      stroke-dasharray: 3,3;
+      filter: drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2));
+    }
+    
+    /* Graph container styles */
     .graph-container {
       flex: 0 0 600px;
       position: relative;
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-right: 20px;
     }
+    
+    /* Analysis container styles */
     .analysis-container {
       flex: 1;
-      padding: 20px;
+      padding: 25px;
       min-width: 300px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
+    
+    .analysis-container p {
+      margin-bottom: 15px;
+    }
+    
+    .analysis-container strong {
+      color: #2c3e50;
+    }
+    
+    /* Markers legend styles */
     .markers-legend {
       position: absolute;
-      bottom: 10px;
-      left: 20px; 
-      padding: 5px;
-      background-color: rgba(255, 255, 255, 0.8);
-      border-radius: 5px;
+      bottom: 15px;
+      left: 25px; 
+      padding: 10px;
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
+    
     .legend-item {
       display: flex;
       align-items: center;
-      margin: 5px 0;
+      margin: 8px 0;
     }
+    
     .legend-circle {
-      width: 12px;
-      height: 12px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
-      margin-right: 8px;
+      margin-right: 10px;
       display: inline-block;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
-    .back-button {
-      margin-top: 20px;
-      padding: 8px 16px;
-    }
-    /* Pie chart container styles */
-    .pie-chart-container {
-      margin: 0 auto;
+    
+    /* Pie chart styles */
+    .pie-container {
+      margin: 0 auto 40px auto;
       width: 100%;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
+    
     .pie-chart-title {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: bold;
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
+      color: #2c3e50;
     }
+    
     #dna-pie-chart {
       display: flex;
       justify-content: center;
       width: 100%;
-      height: 300px;
+      height: 320px;
     }
+    
     .pie-legend {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-      margin-top: 10px;
+      margin-top: 15px;
     }
+    
     .pie-legend-item {
       display: flex;
       align-items: center;
-      margin: 5px 15px;
+      margin: 8px 20px;
     }
+    
     .pie-legend-color {
-      width: 12px;
-      height: 12px;
-      margin-right: 5px;
+      width: 14px;
+      height: 14px;
+      margin-right: 8px;
       display: inline-block;
+      border-radius: 3px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
+    
     .pie-tooltip {
       position: absolute;
-      padding: 8px;
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid #ddd;
+      border-radius: 6px;
       pointer-events: none;
-      font-size: 12px;
+      font-size: 13px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
-    .content-row {
-      display: flex;
-      flex-wrap: wrap;
+    
+    /* Utility styles */
+    .loading {
+      font-size: 18px;
+      text-align: center;
+      padding: 25px;
+      color: #7f8c8d;
+    }
+    
+    .error {
+      color: #e74c3c;
+      font-size: 16px;
+      text-align: center;
+      padding: 20px;
+      background: #fef2f2;
+      border-radius: 5px;
+    }
+    
+    .back-button {
+      margin: 25px auto;
+      padding: 10px 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: block;
+    }
+    
+    .back-button:hover {
+      background-color: #2980b9;
     }
   </style>
 </head>
 <body>
   <h1>Your Risk Analysis</h1>
   <div class="container">
-    <!-- DNA Uniqueness Pie Chart Container - Now at the top -->
+    <!-- DNA Uniqueness Pie Chart Container -->
     <div class="pie-container">
       <div class="pie-chart-title">DNA Uniqueness Profile</div>
       <div id="dna-pie-chart"></div>
@@ -153,7 +245,7 @@
     
     <div class="content-row">
       <div class="graph-container" id="risk-matrix-container">
-        <div class="loading">Loading data...</div>
+        <div class="loading">Loading your risk data...</div>
       </div>
       
       <div class="analysis-container" id="risk-analysis">
@@ -166,6 +258,31 @@
 
   <script type="module">
     import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+
+    // Sample data for fallback
+    const samplePersonData = {
+      name: "John Doe",
+      age: 45,
+      gender: "Male",
+      bmi: 26.4,
+      blood_type: "O+",
+      smoker: false,
+      health_risks: {
+        alzheimer_risk: 0.35
+      },
+      dna_uniqueness: {
+        common: 0.65,
+        unusual: 0.25,
+        rare: 0.10
+      }
+    };
+
+    const sampleGeneralData = {
+      genetic_risk_averages: {
+        alzheimer_risk: 0.25
+      },
+      average_bmi: 24.5
+    };
 
     // Try to fetch data, but use sample data as fallback
     try {
@@ -183,7 +300,7 @@
         // Update analysis text
         updateAnalysis(personData, generalData);
         
-        // Create DNA uniqueness pie chart (now first)
+        // Create DNA uniqueness pie chart
         createDnaPieChart(personData);
       })
       .catch(err => {
@@ -213,9 +330,9 @@
       document.getElementById("dna-pie-chart").innerHTML = "";
       document.getElementById("dna-pie-legend").innerHTML = "";
 
-      const width = 300;  
-      const height = 300; 
-      const radius = Math.min(width, height) / 2;
+      const width = 320;  
+      const height = 320; 
+      const radius = Math.min(width, height) / 2.2;
       
       // Parse DNA uniqueness data
       const dnaData = [
@@ -224,7 +341,7 @@
         { category: "Rare", value: personData.dna_uniqueness.rare }
       ];
       
-      // Color scale for the pie chart
+      // Enhanced color scale for the pie chart
       const colorScale = d3.scaleOrdinal()
         .domain(["Common", "Unusual", "Rare"])
         .range(["#66c2a5", "#fc8d62", "#8da0cb"]);
@@ -242,10 +359,11 @@
         .value(d => d.value)
         .sort(null); // Don't sort, maintain input order
       
-      // Create arc generator
+      // Create arc generator with slight padding between slices
       const arc = d3.arc()
         .innerRadius(0) // Full pie chart
-        .outerRadius(radius - 10);
+        .outerRadius(radius - 10)
+        .padAngle(0.01);
       
       // Create tooltip
       const tooltip = d3.select("body")
@@ -260,31 +378,44 @@
         .append("g")
         .attr("class", "arc");
       
-      // Draw pie slices
+      // Draw pie slices with animation
       arcs.append("path")
         .attr("d", arc)
         .attr("fill", d => colorScale(d.data.category))
         .attr("stroke", "white")
         .style("stroke-width", "2px")
+        .style("filter", "drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2))")
         .on("mouseover", function(event, d) {
+          // Highlight on hover
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr("transform", `scale(1.05)`);
+          
           // Show tooltip on hover
           tooltip.transition()
             .duration(200)
             .style("opacity", 0.9);
           
           const percent = (d.data.value * 100).toFixed(1);
-          tooltip.html(`${d.data.category}: ${percent}%`)
+          tooltip.html(`<strong>${d.data.category}:</strong> ${percent}%`)
             .style("left", (event.pageX + 5) + "px")
             .style("top", (event.pageY - 28) + "px");
         })
         .on("mouseout", function() {
+          // Remove highlight
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr("transform", `scale(1)`);
+          
           // Hide tooltip
           tooltip.transition()
             .duration(500)
             .style("opacity", 0);
         });
       
-      // Add percentage labels to the pie slices - larger font
+      // Add percentage labels to the pie slices
       arcs.append("text")
         .attr("transform", d => {
           // Position labels in the middle of each arc
@@ -294,14 +425,14 @@
         .attr("text-anchor", "middle")
         .attr("dy", ".35em")
         .attr("fill", "white")
-        .style("font-size", "14px") // Increased from 12px
+        .style("font-size", "15px")
         .style("font-weight", "bold")
         .text(d => {
           // Only show percentage if slice is large enough
           return d.data.value >= 0.05 ? `${(d.data.value * 100).toFixed(0)}%` : "";
         });
       
-      // Create legend items - larger font
+      // Create legend items
       const legend = d3.select("#dna-pie-legend");
       
       dnaData.forEach(data => {
@@ -313,8 +444,8 @@
           .style("background-color", colorScale(data.category));
         
         legendItem.append("div")
-          .style("font-size", "16px") // Increased from default
-          .text(`${data.category}: ${(data.value * 100).toFixed(1)}%`);
+          .style("font-size", "16px")
+          .html(`<strong>${data.category}:</strong> ${(data.value * 100).toFixed(1)}%`);
       });
       
       console.log("DNA pie chart created successfully");
@@ -326,10 +457,10 @@
       const config = {
         width: 600,
         height: 500,
-        margin: { top: 80, right: 50, bottom: 100, left: 140 }, // Increased left margin for y-axis
+        margin: { top: 80, right: 50, bottom: 100, left: 140 },
         cellSize: 60,
         levels: 5, // 5x5 risk matrix
-        colorRange: ["#00ff00", "#ffff00", "#ff0000"] // green to yellow to red
+        colorRange: ["#4CAF50", "#FFC107", "#F44336"] // green to yellow to red (enhanced colors)
       };
 
       // Calculate actual dimensions
@@ -406,7 +537,7 @@
       // Add subtitle with person name
       svg.append("text")
         .attr("x", width / 2)
-        .attr("y", 50)
+        .attr("y", 55)
         .attr("text-anchor", "middle")
         .text(`${personData.name} vs. Population Average`);
 
@@ -422,7 +553,7 @@
         }
       }
 
-      // Draw cells
+      // Draw cells with smooth corners
       const g = svg.append("g")
         .attr("transform", `translate(${config.margin.left},${config.margin.top})`);
 
@@ -433,9 +564,12 @@
         .attr("class", "risk-cell")
         .attr("x", d => (d.likelihood - 1) * cellSize)
         .attr("y", d => (config.levels - d.impact) * cellSize)
-        .attr("width", cellSize)
-        .attr("height", cellSize)
+        .attr("width", cellSize - 2) // Create a small gap between cells
+        .attr("height", cellSize - 2)
+        .attr("rx", 3) // Rounded corners
+        .attr("ry", 3)
         .attr("fill", d => colorScale(Math.sqrt(d.score)))
+        .style("opacity", 0.9) // Slightly transparent
         .append("title")
         .text(d => `Impact: ${impactLevels[d.impact-1].label}, Likelihood: ${likelihoodLevels[d.likelihood-1].label}\nRisk Score: ${d.score}`);
 
@@ -444,8 +578,8 @@
         .attr("class", "person-marker")
         .attr("cx", (personLikelihood - 0.5) * cellSize)
         .attr("cy", (config.levels - personImpact + 0.5) * cellSize)
-        .attr("r", 10)
-        .attr("fill", "rgba(0, 0, 255, 0.7)")
+        .attr("r", 12)
+        .attr("fill", "rgba(0, 102, 204, 0.8)")
         .append("title")
         .text(`${personData.name}: Impact ${personImpact}, Likelihood ${personLikelihood}\nRisk Value: ${personAlzheimerRisk.toFixed(2)}`);
 
@@ -454,8 +588,8 @@
         .attr("class", "average-marker")
         .attr("cx", (averageLikelihood - 0.5) * cellSize)
         .attr("cy", (config.levels - averageImpact + 0.5) * cellSize)
-        .attr("r", 10)
-        .attr("fill", "rgba(128, 128, 128, 0.7)")
+        .attr("r", 12)
+        .attr("fill", "rgba(128, 128, 128, 0.8)")
         .append("title")
         .text(`Population Average: Impact ${averageImpact}, Likelihood ${averageLikelihood}\nRisk Value: ${averageAlzheimerRisk.toFixed(2)}`);
 
@@ -464,19 +598,19 @@
       markersLegendDiv.className = "markers-legend";
       markersLegendDiv.innerHTML = `
         <div class="legend-item">
-          <div class="legend-circle" style="background-color: rgba(0, 0, 255, 0.7);"></div>
-          <span>${personData.name}</span>
+          <div class="legend-circle" style="background-color: rgba(0, 102, 204, 0.8);"></div>
+          <span><strong>${personData.name}</strong></span>
         </div>
         <div class="legend-item">
-          <div class="legend-circle" style="background-color: rgba(128, 128, 128, 0.7);"></div>
-          <span>Population Average</span>
+          <div class="legend-circle" style="background-color: rgba(128, 128, 128, 0.8);"></div>
+          <span><strong>Population Average</strong></span>
         </div>
       `;
       document.getElementById("risk-matrix-container").appendChild(markersLegendDiv);
 
       // Draw x-axis (Likelihood)
       const xAxis = g.append("g")
-        .attr("transform", `translate(0, ${config.levels * cellSize})`);
+        .attr("transform", `translate(0, ${config.levels * cellSize + 5})`);
 
       xAxis.selectAll("text")
         .data(likelihoodLevels)
@@ -495,9 +629,9 @@
         .attr("text-anchor", "middle")
         .text("Likelihood");
 
-      // Draw y-axis (Impact) - Fixed positioning to prevent clipping into text
+      // Draw y-axis (Impact)
       const yAxis = g.append("g")
-        .attr("transform", `translate(-30, 0)`);  // Increased the offset from -10 to -30
+        .attr("transform", `translate(-30, 0)`);
 
       yAxis.selectAll("text")
         .data(impactLevels.slice().reverse())
@@ -509,12 +643,12 @@
         .attr("dominant-baseline", "middle")
         .text(d => d.label);
 
-      // Y-axis label - Fixed positioning
+      // Y-axis label
       g.append("text")
         .attr("class", "axis-label")
         .attr("transform", "rotate(-90)")
         .attr("x", -(config.levels * cellSize) / 2)
-        .attr("y", -105)  // Increased from -50 to -70
+        .attr("y", -105)
         .attr("text-anchor", "middle")
         .text("Impact");
 
@@ -544,38 +678,43 @@
       const averageRisk = generalData.genetic_risk_averages.alzheimer_risk;
       const riskDifference = ((personRisk - averageRisk) / averageRisk * 100).toFixed(0);
       
-      let riskLevel;
-      if (personRisk < 0.2) riskLevel = "low";
-      else if (personRisk < 0.6) riskLevel = "moderate";
-      else riskLevel = "high";
+      let riskLevel, riskColor;
+      if (personRisk < 0.2) {
+        riskLevel = "low";
+        riskColor = "#4CAF50"; // Green
+      } else if (personRisk < 0.6) {
+        riskLevel = "moderate";
+        riskColor = "#FFC107"; // Yellow
+      } else {
+        riskLevel = "high";
+        riskColor = "#F44336"; // Red
+      }
       
       const analysisHtml = `
-        <p><strong>Risk Analysis:</strong></p>
+        <h3 style="color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 10px;">Risk Analysis</h3>
         <p>This risk matrix shows your Alzheimer's risk (blue circle) 
         compared to the population average (gray circle). The x-axis represents likelihood, while the y-axis 
         represents impact. The color gradient from green to yellow to red indicates increasing risk levels.</p>
         
-        <p><strong>Interpretation:</strong></p>
-        <p>Your Alzheimer's risk (${(personRisk * 100).toFixed(1)}%) 
-        is ${riskDifference}% higher than the population average (${(averageRisk * 100).toFixed(1)}%). 
-        Your risk falls in the ${riskLevel} range.</p>
+        <h3 style="color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 10px;">Interpretation</h3>
+        <p>Your Alzheimer's risk (<span style="font-weight: bold;">${(personRisk * 100).toFixed(1)}%</span>) 
+        is <span style="font-weight: bold; color: ${riskDifference > 0 ? '#F44336' : '#4CAF50'}">${riskDifference}% ${riskDifference > 0 ? 'higher' : 'lower'}</span> than the population average (${(averageRisk * 100).toFixed(1)}%). 
+        Your risk falls in the <span style="font-weight: bold; color: ${riskColor};">${riskLevel}</span> range.</p>
         
-        <p><strong>Risk Factors:</strong></p>
-        <p>
-        Age: ${personData.age} years old<br>
-        Gender: ${personData.gender}<br>
-        BMI: ${personData.bmi} (avg: ${generalData.average_bmi})<br>
-        Blood Type: ${personData.blood_type}<br>
-        Smoker: ${personData.smoker ? "Yes" : "No"}
-        </p>
+        <h3 style="color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 10px;">Risk Factors</h3>
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 15px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><strong>Age:</strong> ${personData.age} years old</div>
+            <div><strong>Gender:</strong> ${personData.gender}</div>
+            <div><strong>BMI:</strong> ${personData.bmi} (avg: ${generalData.average_bmi})</div>
+            <div><strong>Blood Type:</strong> ${personData.blood_type}</div>
+            <div><strong>Smoker:</strong> ${personData.smoker ? "Yes" : "No"}</div>
+          </div>
+        </div>
       `;
       
       document.getElementById("risk-analysis").innerHTML = analysisHtml;
     }
-
-    // Initialize with sample data immediately as a fallback
-    // This ensures something is displayed even if fetch fails
-    createDnaPieChart(samplePersonData);
   </script>
 </body>
 </html>
