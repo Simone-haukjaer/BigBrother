@@ -1,19 +1,482 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Big Brother - Health Data</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Risk Analysis</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    
+    .header {
+      text-align: center;
+      padding: 10px 0;
+      border-bottom: 2px solid #e0e0e0;
+      margin-bottom: 20px;
+    }
+    
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .chart-container {
+      position: relative;
+      margin: 20px auto;
+      height: 300px;
+      width: 100%;
+    }
+    
+    .risk-matrix {
+      margin-top: 30px;
+    }
+    
+    .matrix-container {
+      display: flex;
+      margin-top: 20px;
+    }
+    
+    .matrix-chart {
+      width: 60%;
+    }
+    
+    .matrix-info {
+      width: 40%;
+      padding-left: 20px;
+    }
+    
+    h2 {
+      font-size: 18px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .legend {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-right: 20px;
+      margin-bottom: 10px;
+    }
+    
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+    
+    .interpretation {
+      margin-top: 20px;
+      border-top: 1px solid #eee;
+      padding-top: 20px;
+    }
+    
+    .interpretation h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    
+    .moderate {
+      color: #ffaa00;
+      font-weight: bold;
+    }
+    
+    .higher {
+      color: #ff5555;
+      font-weight: bold;
+    }
+    
+    .risk-factors {
+      margin-top: 20px;
+      border-top: 1px solid #eee;
+      padding-top: 20px;
+    }
+    
+    .risk-factors h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    
+    .factors-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    
+    .factor-item {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .back-button {
+      display: block;
+      width: 200px;
+      margin: 20px auto;
+      padding: 10px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      text-align: center;
+      cursor: pointer;
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
-    <h1>Big Brother - Genetic Health Risk Report</h1>
-    <p>Esimated risk of developing Alzheimer's within your lifetime: </p>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>   
-
-    <canvas id="barChart" style="width:100%;max-width:600px"></canvas>
-    <script type="module" src="chartjs/barchart.js"></script>
-
+  <div class="header">
+    <h1>Your Risk Analysis</h1>
+  </div>
+  
+  <div class="container">
+    <div class="card">
+      <h2>DNA Uniqueness Profile</h2>
+      <div class="chart-container">
+        <canvas id="dnaChart"></canvas>
+      </div>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-color" style="background-color: #4ECCA3;"></div>
+          <span>Common: 70.0%</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background-color: #FF9A76;"></div>
+          <span>Unusual: 25.0%</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background-color: #A2D5F2;"></div>
+          <span>Rare: 5.0%</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card risk-matrix">
+      <h2>Alzheimer's Risk Matrix</h2>
+      <div>John Doe vs. Population Average</div>
+      <div class="matrix-container">
+        <div class="matrix-chart">
+          <canvas id="matrixChart"></canvas>
+        </div>
+        <div class="matrix-info">
+          <div>
+            <p>This risk matrix shows your Alzheimer's risk (blue circle) compared to the population average (gray circle). The x-axis represents likelihood, while the y-axis represents impact. The color gradient from green to yellow to red indicates increasing risk levels.</p>
+          </div>
+          
+          <div class="interpretation">
+            <h3>Interpretation</h3>
+            <p>Your Alzheimer's risk (<span class="higher">50.0%</span>) is <span class="higher">150% higher</span> than the population average (20.0%). Your risk falls in the <span class="moderate">moderate</span> range.</p>
+          </div>
+          
+          <div class="risk-factors">
+            <h3>Risk Factors</h3>
+            <div class="factors-grid">
+              <div class="factor-item">
+                <span>Age:</span>
+                <span>34 years old</span>
+              </div>
+              <div class="factor-item">
+                <span>Gender:</span>
+                <span>Male</span>
+              </div>
+              <div class="factor-item">
+                <span>BMI:</span>
+                <span>24.5 (avg: 24.9)</span>
+              </div>
+              <div class="factor-item">
+                <span>Blood Type:</span>
+                <span>O+</span>
+              </div>
+              <div class="factor-item">
+                <span>Smoker:</span>
+                <span>No</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <a href="#" class="back-button">Back to Data View</a>
+  </div>
+  
+  <script>
+    // Load data
+    const personData = {
+      "id": "1",
+      "name": "John Doe",
+      "age": 34,
+      "gender": "Male",
+      "bmi": 24.5,
+      "blood_type": "O+",
+      "smoker": false,
+      "health_risks": {
+        "diabetes_risk": 0.6,
+        "heart_disease_risk": 0.7,
+        "stroke_risk": 0.3,
+        "altheimers_indicative_mutations:": 1,
+        "alzheimers_risk": 0.5,
+        "lung_cancer_risk": 0.1
+      },
+      "dna_uniqueness": {
+        "common": 0.7,
+        "unusual": 0.25,
+        "rare": 0.05
+      }
+    };
+    
+    const generalData = {
+      "average_bmi": 24.9,
+      "average_heart_rate_bpm": 72,
+      "average_cholesterol_level": 190,
+      "average_blood_pressure": "120/80",
+      "genetic_risk_averages": {
+        "diabetes_risk": 0.4,
+        "heart_disease_risk": 0.5,
+        "stroke_risk": 0.3,
+        "alzheimer_risk": 0.2,
+        "lung_cancer_risk": 0.15
+      }
+    };
+    
+    // Create DNA Uniqueness Pie Chart
+    const dnaCtx = document.getElementById('dnaChart').getContext('2d');
+    const dnaChart = new Chart(dnaCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Common', 'Unusual', 'Rare'],
+        datasets: [{
+          data: [
+            personData.dna_uniqueness.common * 100, 
+            personData.dna_uniqueness.unusual * 100, 
+            personData.dna_uniqueness.rare * 100
+          ],
+          backgroundColor: [
+            '#4ECCA3',  // green for common
+            '#FF9A76',  // orange for unusual
+            '#A2D5F2'   // blue for rare
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.label + ': ' + context.parsed.toFixed(1) + '%';
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    // Create Risk Matrix Heat Map
+    const matrixCtx = document.getElementById('matrixChart').getContext('2d');
+    
+    // Function to generate heat map data
+    function generateHeatmapData() {
+      const impactLabels = ['Minimal', 'Minor', 'Moderate', 'Major', 'Severe'];
+      const likelihoodLabels = ['Rare', 'Unlikely', 'Possible', 'Likely/Almost Certain'];
+      
+      // Create empty data array (5x4)
+      const data = [];
+      
+      // Generate gradient data
+      for (let i = 0; i < impactLabels.length; i++) {
+        for (let j = 0; j < likelihoodLabels.length; j++) {
+          // Calculate risk level (0-1)
+          const riskLevel = (j / (likelihoodLabels.length - 1) + i / (impactLabels.length - 1)) / 2;
+          data.push({
+            x: j,
+            y: 4 - i,  // Y-axis is reversed in the matrix
+            v: riskLevel
+          });
+        }
+      }
+      
+      return {
+        impactLabels,
+        likelihoodLabels,
+        data
+      };
+    }
+    
+    const heatmapData = generateHeatmapData();
+    
+    // Create a bubble chart to represent John and population points
+    const bubbleData = [
+      {
+        x: 2.3,  // Position for John (Possible to Likely)
+        y: 1.6,  // Position for John (Moderate to Major)
+        r: 8,    // Radius
+        label: 'John Doe',
+        color: '#2980b9'  // Blue
+      },
+      {
+        x: 1.2,  // Position for Population (Unlikely to Possible)
+        y: 0.8,  // Position for Population (Minor to Moderate)
+        r: 6,    // Radius
+        label: 'Population Average',
+        color: '#7f8c8d'  // Gray
+      }
+    ];
+    
+    // Create risk matrix chart
+    const matrixChart = new Chart(matrixCtx, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          // Heatmap background
+          {
+            type: 'bubble',
+            label: 'Risk Levels',
+            data: heatmapData.data.map(point => ({
+              x: point.x,
+              y: point.y,
+              r: 15
+            })),
+            backgroundColor: heatmapData.data.map(point => {
+              // Color gradient from green to yellow to red
+              if (point.v < 0.3) {
+                return `rgba(46, 204, 113, ${0.6 + point.v})`;  // Green
+              } else if (point.v < 0.7) {
+                return `rgba(241, 196, 15, ${0.6 + point.v * 0.4})`;  // Yellow
+              } else {
+                return `rgba(231, 76, 60, ${0.6 + point.v * 0.4})`;  // Red
+              }
+            }),
+            borderColor: 'rgba(0,0,0,0.1)',
+            borderWidth: 1,
+            hoverRadius: 0,
+            hoverBackgroundColor: 'transparent',
+            pointStyle: 'rect'
+          },
+          // John Doe point
+          {
+            type: 'bubble',
+            label: bubbleData[0].label,
+            data: [{
+              x: bubbleData[0].x,
+              y: bubbleData[0].y,
+              r: bubbleData[0].r
+            }],
+            backgroundColor: bubbleData[0].color,
+            borderColor: 'white',
+            borderWidth: 2
+          },
+          // Population Average point
+          {
+            type: 'bubble',
+            label: bubbleData[1].label,
+            data: [{
+              x: bubbleData[1].x,
+              y: bubbleData[1].y,
+              r: bubbleData[1].r
+            }],
+            backgroundColor: bubbleData[1].color,
+            borderColor: 'white',
+            borderWidth: 2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            min: -0.5,
+            max: 3.5,
+            ticks: {
+              callback: function(value) {
+                if (Number.isInteger(value) && value >= 0 && value < heatmapData.likelihoodLabels.length) {
+                  return heatmapData.likelihoodLabels[value];
+                }
+                return '';
+              }
+            },
+            grid: {
+              display: true,
+              color: 'rgba(0, 0, 0, 0.1)'
+            },
+            title: {
+              display: true,
+              text: 'Likelihood'
+            }
+          },
+          y: {
+            min: -0.5,
+            max: 4.5,
+            ticks: {
+              callback: function(value) {
+                if (Number.isInteger(value) && value >= 0 && value < heatmapData.impactLabels.length) {
+                  return heatmapData.impactLabels[4 - value];
+                }
+                return '';
+              }
+            },
+            grid: {
+              display: true,
+              color: 'rgba(0, 0, 0, 0.1)'
+            },
+            title: {
+              display: true,
+              text: 'Impact'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const datasetLabel = context.dataset.label || '';
+                if (datasetLabel === 'Risk Levels') {
+                  const xIndex = Math.round(context.parsed.x);
+                  const yIndex = Math.round(context.parsed.y);
+                  if (xIndex >= 0 && xIndex < heatmapData.likelihoodLabels.length && 
+                      yIndex >= 0 && yIndex < heatmapData.impactLabels.length) {
+                    const impact = heatmapData.impactLabels[4 - yIndex];
+                    const likelihood = heatmapData.likelihoodLabels[xIndex];
+                    return `${impact} impact, ${likelihood} likelihood`;
+                  }
+                  return '';
+                }
+                return datasetLabel;
+              }
+            }
+          }
+        }
+      }
+    });
+  </script>
 </body>
 </html>
