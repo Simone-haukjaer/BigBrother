@@ -167,18 +167,6 @@
   <script type="module">
     import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
-
-    const sampleGeneralData = {
-      "genetic_risk_averages": {
-        "alzheimer_risk": 0.3,
-        "diabetes_risk": 0.4,
-        "heart_disease_risk": 0.5,
-        "stroke_risk": 0.2,
-        "lung_cancer_risk": 0.15
-      },
-      "average_bmi": 26.2
-    };
-
     // Try to fetch data, but use sample data as fallback
     try {
       Promise.all([
@@ -224,10 +212,9 @@
       // Clear any existing content
       document.getElementById("dna-pie-chart").innerHTML = "";
       document.getElementById("dna-pie-legend").innerHTML = "";
-      
-      // Set up dimensions - LARGER size
-      const width = 300;  // Increased from 220
-      const height = 300; // Increased from 220
+
+      const width = 300;  
+      const height = 300; 
       const radius = Math.min(width, height) / 2;
       
       // Parse DNA uniqueness data
