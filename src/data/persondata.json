@@ -12,6 +12,11 @@
       "stroke_risk": 0.3,
       "alzheimer_risk": 0.5,
       "lung_cancer_risk": 0.1
+    },
+    "dna_uniqueness": {
+      "common": 0.7,
+      "unusual": 0.25,
+      "rare": 0.05
     }
   }
   
